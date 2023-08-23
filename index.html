@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+  <script>
+    let eventSource;
+
+    function start() {
+      // when "Start" button pressed
+      if (!window.EventSource) {
+        // IE or an old browser
+        alert("The browser doesn't support EventSource.");
+        return;
+      }
+
+      eventSource = new EventSource("http://localhost:8080/sse");
+      console.log(eventSource)
+
+      eventSource.onopen = function (e) {
+        log("Event: open");
+      };
+
+      eventSource.onerror = function (e) {
+        log("Event: error");
+        if (this.readyState == EventSource.CONNECTING) {
+          log(`Reconectando (readyState=${this.readyState})...`);
+        } else {
+          log("Erro aconteceu");
+        }
+      };
+
+      eventSource.addEventListener("foobar", function (e) {
+        log("Event: foobar, data: " + e.data);
+      });
+
+      eventSource.addEventListener("foo", function (e) {
+        log("Event: foo, data: " + e.data);
+      });
+
+      eventSource.addEventListener("bar", function (e) {
+        console.log(e)
+        console.log(e.eventPhase)
+        log("Event: bar, data: " + e.data);
+      });
+
+
+      eventSource.onmessage = function (e) {
+        console.log(e.eventPhase)
+        console.log(e)
+        log("Event: message, data: " + e.data);
+      };
+    }
+
+    function stop() {
+      // when "Stop" button pressed
+      eventSource.close();
+      log("eventSource.close()");
+    }
+
+    function log(msg) {
+      logElem.innerHTML += msg + "<br>";
+      document.documentElement.scrollTop = 99999999;
+    }
+  </script>
+
+  <button onclick="start()">Start</button>
+  Press the "Start" to begin.
+  <div id="logElem" style="margin: 6px 0"></div>
+
+  <button onclick="stop()">Stop</button>
+  "Stop" to finish.
+</html>
